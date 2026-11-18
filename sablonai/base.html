@@ -11,6 +11,7 @@
 <body>
 <header class="virsus">
   <div class="plotis">
+    {% if mru_logo %}<a class="virsus-mru" href="{{ programa.nuoroda }}"><img src="{{ kelias }}{{ mru_logo }}" alt="Mykolo Romerio universitetas" height="36"></a>{% endif %}
     <a class="logo" href="{{ kelias }}index.html">Sveikata skaičiais</a>
     <nav class="meniu" aria-label="{{ t('Pagrindinis meniu', 'Main menu') }}">
       <a class="meniu-nuoroda meniu-plati" href="{{ kelias }}index.html#suvestine">{{ t("Suvestinė", "Overview") }}</a>
@@ -29,7 +30,7 @@
         </div>
       </details>
       <a class="meniu-nuoroda meniu-plati" href="{{ kelias }}metodika.html">{{ t("Metodika", "Methodology") }}</a>
-      <a class="meniu-nuoroda meniu-programa" href="{{ programa.nuoroda }}">Studijuok {{ programa.pavadinimas|lower }}</a>
+      <a class="meniu-nuoroda meniu-programa" href="{{ programa.nuoroda }}">Studijų programa</a>
     </nav>
   </div>
 </header>
@@ -53,7 +54,7 @@
       <p>Duomenų šaltiniai: Eurostat, Valstybės duomenų agentūra ir Lietuvos atvirų duomenų portalas (data.gov.lt),
          Užimtumo tarnyba, Higienos institutas. Duomenys tikrinami kas savaitę; puslapis atnaujintas {{ atnaujinta }}.
          <a href="{{ kelias }}metodika.html">Vertinimo metodika</a>.</p>
-      <p>Švieslentę parengė <a href="{{ programa.nuoroda }}">{{ programa.pavadinimas }}</a> studijų programos komanda.
+      <p>Švieslentę parengė studijų programos <a href="{{ programa.nuoroda }}">„{{ programa.pavadinimas }}“</a> komanda.
          Ji sukurta remiantis MRU <a href="https://dgudel.github.io/vyriausybes-veiklos-stebesena/">Vyriausybės veiklos stebėsenos švieslente</a>.</p>
       <p class="apacia-di"><span class="di-zyma" aria-hidden="true">DI</span>
          Kuriant švieslentę naudotas dirbtinis intelektas (Anthropic Claude).
