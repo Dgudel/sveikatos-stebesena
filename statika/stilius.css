@@ -319,7 +319,7 @@ a { color: var(--akcentas); }
   background: var(--vadyba-fonas); border-radius: 999px; padding: 4px 12px; margin-bottom: 12px !important; }
 .meniu-programa { background: var(--vadyba); color: #fff !important; border-radius: 999px; padding: 6px 14px !important;
   text-decoration: none; font-weight: 600; white-space: nowrap; }
-.meniu-programa:hover { filter: brightness(1.1); }
+.meniu-programa:hover, .meniu-programa:focus-visible { background: #0a5c51; color: #fff !important; }
 .kortele-vadyba { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--linija); font-size: 13px;
   line-height: 1.4; color: var(--tekstas-antr); }
 .kortele-vadyba b { color: var(--vadyba); }
