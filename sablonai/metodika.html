@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% set kelias = "" %}
+{% block title %}Vertinimo metodika · Sveikata skaičiais{% endblock %}
+{% block turinys %}
+
+<nav class="kelias-nav"><a href="index.html">← Švieslentė</a></nav>
+<section class="ivadas metodika-ivadas">
+  <h1>Kaip vertinama: gerėja, stabilu ar prastėja</h1>
+  <p>Kiekvieno rodiklio būsena nustatoma automatiškai pagal iš anksto paskelbtą taisyklę, todėl vertinimas
+     nepriklauso nuo to, kas ir kada jį skaičiuoja.</p>
+  <ol class="metodika-zingsniai">
+    <li><b>Su kuo lyginama.</b> Naujausia reikšmė lyginama su <b>tuo pačiu laikotarpiu prieš metus</b>
+        (mėnesiniai duomenys – su tuo pačiu mėnesiu, ketvirtiniai – su tuo pačiu ketvirčiu, metiniai – su ankstesniais
+        metais). Taip neatsiranda sezoninių svyravimų: pvz., šildymo sezono kainos lyginamos su praėjusio šildymo sezono.
+        Su ankstesniu mėnesiu ar pagal ilgalaikį trendą nelyginama.</li>
+    <li><b>Kryptis.</b> Kiekvienam rodikliui nustatyta, kuri kryptis yra gera (pvz., išvengiamo mirtingumo – mažėjimas,
+        gyvenimo trukmės – augimas).</li>
+    <li><b>Slenkstis.</b> Pokytis, mažesnis už rodikliui nustatytą slenkstį, laikomas <b>stabiliu</b> – taip
+        atsitiktiniai svyravimai ir apklausų paklaida nerodomi kaip gerėjimas ar prastėjimas.</li>
+    <li><b>Sudedamosios dalys.</b> Jei rodiklio puslapyje grafikuose rodomi ir kiti Lietuvos matai (pvz., gydytojai šalia
+        slaugytojų, sveiko gyvenimo metai šalia gyvenimo trukmės), kiekvienas jų vertinamas atskirai ta pačia
+        logika ir įskaičiuojamas į bendrą suvestinę. Palyginimai su ES vidurkiu, Latvija ir Estija
+        nevertinami – jie padeda suprasti, kur Lietuva yra.</li>
+    <li><b>Išimtys.</b> Sveikatos išlaidos rodomos be vertinimo (◆ Stebimas): didesnės išlaidos savaime nereiškia
+        geresnės sveikatos. Kai kurie duomenys (mirtingumas, personalas) skelbiami su 1–3 metų vėlavimu – prie
+        kiekvieno rodiklio nurodyti duomenų metai.</li>
+  </ol>
+</section>
+
+<section class="metodika-sritis metodika-di" id="di" aria-labelledby="di-pav">
+  <h2 id="di-pav">Dirbtinio intelekto naudojimas</h2>
+  <p>Vadovaujantis skaidrumo principu ir ES dirbtinio intelekto akto (Reglamentas (ES) 2024/1689) 50 straipsnio
+     nuostatomis informuojame, kad kuriant šią švieslentę buvo naudojama dirbtinio intelekto sistema –
+     <b>Anthropic Claude</b> modelis.</p>
+  <ul>
+    <li><b>Kam naudotas DI:</b> programiniam kodui (duomenų atsisiuntimui, apdorojimui, grafikams ir svetainės
+        generavimui) rašyti, duomenų rinkiniams parinkti, rodiklių aprašymų, vertinimo taisyklių ir paaiškinimų
+        šablonų tekstams parengti bei svetainei išversti į anglų kalbą.</li>
+    <li><b>Kam DI nenaudojamas:</b> svetainės veikimo metu DI nenaudojamas. Rodiklių reikšmės, pokyčiai ir būsenos
+        („gerėja“, „stabilu“, „prastėja“) kasdien apskaičiuojami automatiškai iš oficialių šaltinių duomenų pagal šiame
+        puslapyje paskelbtas taisykles, o paaiškinimų sakiniai sudaromi iš apskaičiuotų skaičių pagal iš anksto
+        parengtus šablonus.</li>
+    <li><b>Žmogaus priežiūra:</b> rodiklių pasirinkimą, vertinimo taisykles, slenksčius ir svetainės turinį peržiūrėjo
+        ir už juos atsako švieslentės rengėjai – Mykolo Romerio universiteto Sveikatos vadybos studijų programos komanda.</li>
+  </ul>
+  <p class="vv-pastaba">Pastebėję klaidą ar netikslumą, praneškite švieslentės kūrėjui – Mykolo Romerio universitetui (kontaktai nurodyti puslapio apačioje).</p>
+</section>
+
+{% for s in sritys %}
+<section class="metodika-sritis">
+  <h2>{{ s.nr }}. {{ s.pavadinimas }}</h2>
+  <div class="lentele-wrap">
+  <table class="metodika-lentele">
+    <thead><tr><th>{{ t("Rodiklis", "Indicator") }}</th><th>{{ t("Dabartinė būsena", "Current status") }}</th><th>{{ t("Palyginimo pagrindas", "Basis of comparison") }}</th><th>{{ t("Taisyklė", "Rule") }}</th></tr></thead>
+    <tbody>
+    {% for r in s.rodikliai %}
+    <tr id="{{ r.id }}">
+      <td><a href="rodikliai/{{ r.id }}.html">{{ r.pavadinimas }}</a></td>
+      <td><span class="zyme zyme-{{ r.busena }}"><span aria-hidden="true">{{ busenos[r.busena].ikona }}</span> {{ busenos[r.busena].zodis }}</span></td>
+      <td>{{ r.palyginimas|pirma_didzioji if r.palyginimas else "–" }}</td>
+      <td>{{ r.vertinimo_taisykle }}</td>
+    </tr>
+    {% for x in r.dalys %}
+    <tr class="met-dalis">
+      <td>↳ {{ x.pavadinimas }}</td>
+      <td><span class="zyme zyme-{{ x.busena }}"><span aria-hidden="true">{{ busenos[x.busena].ikona }}</span> {{ busenos[x.busena].zodis }}</span></td>
+      <td>{{ x.palyginimas|pirma_didzioji if x.palyginimas else "–" }}</td>
+      <td>{{ x.taisykle }}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

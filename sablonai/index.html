@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% set kelias = "" %}
+{% block turinys %}
+<section class="ivadas">
+  <p class="ivadas-zyma">{{ programa.pavadinimas }} · {{ programa.aprasas }}</p>
+  <h1>Lietuvos sveikata skaičiais: kur reikia vadybininko?</h1>
+  <p>Keturi klausimai ir {{ (pagr_sk + kitu_sk)|rodikliu }} apie tai, kaip veikia Lietuvos sveikatos sistema:
+     kiek gyvename, ar pacientai laiku gauna pagalbą, kas dirba ligoninėse ir ar šioje srityje yra darbo.
+     Kiekvienas skaičius – tai problema, kurią sprendžia <b>sveikatos vadybininkas</b>: žmogus, kuris supranta ir
+     mediciną, ir organizavimą. Paspauskite rodiklį – pamatysite grafikus, palyginimą su ES, Latvija ir Estija bei
+     tai, ką čia gali pakeisti vadyba.</p>
+  <p class="metodas"><b>Kaip vertinama?</b> Naujausia reikšmė lyginama <b>su tuo pačiu laikotarpiu prieš metus</b>.
+     Pokytis, mažesnis už rodikliui nustatytą slenkstį, laikomas stabiliu: ▲ gerėja, ■ stabilu, ▼ prastėja,
+     ◆ tik stebimas. <a href="metodika.html">Visos vertinimo taisyklės →</a></p>
+</section>
+
+<section class="apzvalga" id="suvestine" aria-labelledby="suv-pav">
+  <h2 id="suv-pav" class="sr-only">{{ t("Bendras vaizdas", "Overall picture") }}</h2>
+  <div class="suv-bendra">
+    {% set C = 100 %}
+    {% set dalis = namespace(poslinkis=25) %}
+    <svg class="spurga" viewBox="0 0 42 42" role="img"
+         aria-label="{{ t('Iš', 'Of') }} {{ vertinti }} {{ t('vertinamų rodiklių', 'assessed indicators') }}: {{ busenos.gereja.zodis|lower }} {{ bendra.gereja }}, {{ busenos.stabilu.zodis|lower }} {{ bendra.stabilu }}, {{ busenos.prasteja.zodis|lower }} {{ bendra.prasteja }}">
+      <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--linija)" stroke-width="5"/>
+      {% for k in ["gereja", "stabilu", "prasteja"] if bendra[k] %}
+      {% set p = bendra[k] / vertinti * C %}
+      <circle class="spurga-{{ k }}" cx="21" cy="21" r="15.915" fill="none" stroke-width="5"
+              stroke-dasharray="{{ '%.2f' % (p - 0.6) }} {{ '%.2f' % (C - p + 0.6) }}" stroke-dashoffset="{{ '%.2f' % dalis.poslinkis }}"/>
+      {% set dalis.poslinkis = dalis.poslinkis - p %}
+      {% endfor %}
+      <text x="21" y="20.5" class="spurga-sk">{{ bendra.gereja }}/{{ vertinti }}</text>
+      <text x="21" y="26" class="spurga-tekstas">{{ busenos.gereja.zodis|lower }}</text>
+    </svg>
+    <div class="suv-legenda">
+      <h3>{{ t("Bendras vaizdas", "Overall picture") }}</h3>
+      <p class="suv-paaisk">{% if en %}{{ vertinti }} of {{ pagr_sk + kitu_sk }} indicators assessed, including “Other indicators”{% if bendra.info %}; {{ bendra.info }} only monitored{% endif %}{% else %}Vertinama {{ vertinti }} iš {{ pagr_sk + kitu_sk }} rodiklių, įskaitant „Kitus rodiklius“{% if bendra.info %}; {{ bendra.info }} tik stebimi{% endif %}{% endif %}</p>
+      {% for k in ["gereja", "stabilu", "prasteja"] %}
+      <div class="suv-eil suv-{{ k }}"><span class="suv-ikona" aria-hidden="true">{{ busenos[k].ikona }}</span>
+        <b>{{ bendra[k] }}</b> {{ busenos[k].zodis|lower }}</div>
+      {% endfor %}
+      {% if bendra.info %}<div class="suv-eil suv-info"><span class="suv-ikona" aria-hidden="true">◆</span> <b>{{ bendra.info }}</b> {{ t("stebimi, nevertinami", "monitored, not assessed") }}</div>{% endif %}
+      <a class="suv-metodika" href="metodika.html">{{ t("Kaip vertinama", "How it is assessed") }} →</a>
+    </div>
+  </div>
+
+  <div class="suv-sritys">
+    {% for s in sritys %}
+    {% set g = s.suvestine.gereja %}{% set st = s.suvestine.stabilu %}{% set pr = s.suvestine.prasteja %}
+    <a class="sr-kortele" href="#sritis-{{ s.nr }}">
+      <span class="sr-galva"><span class="sr-nr">{{ s.nr }}</span><span class="sr-pav">{{ s.pavadinimas }}</span></span>
+      <span class="segmentai" aria-hidden="true">
+        {% for r in s.rodikliai %}<span class="seg-grupe" title="{{ r.pavadinimas }}">{% for b in r.visos_busenos if b != "nera" %}<span class="seg seg-{{ b }}"></span>{% endfor %}</span>{% endfor %}
+      </span>
+      <span class="sr-sarasas">
+        {% for r in s.pagrindines %}{% set kitos_r = s.kitos|selectattr("tevas", "sameas", r)|list if r.tevas is not defined else [] %}<span class="sr-rod"><i class="t-{{ r.busena }}" aria-hidden="true"></i><span class="sr-rod-pav">{{ r.pavadinimas }}{% if kitos_r %} <span class="sr-dalys" title="{{ t('Sudedamųjų dalių būsenos', 'Status of components') }}" aria-hidden="true">{% for x in kitos_r %}<b class="t-{{ x.busena }}"></b>{% endfor %}</span>{% endif %}</span><span class="sr-only"> – {{ busenos[r.busena].zodis }}</span></span>{% endfor %}
+      </span>
+      <span class="sr-skaiciai">
+        {% if g %}<span class="c-gereja">▲ {{ g }}</span>{% endif %}
+        {% if st %}<span class="c-stabilu">■ {{ st }}</span>{% endif %}
+        {% if pr %}<span class="c-prasteja">▼ {{ pr }}</span>{% endif %}
+        <span class="sr-is">{{ s.pagrindines|length }} {{ t("pagr.", "key") }} + {{ s.kitos|length }} {{ t("kiti", "other") }}</span>
+      </span>
+      <span class="sr-only">{{ busenos.gereja.zodis }} {{ g }}, {{ busenos.stabilu.zodis|lower }} {{ st }}, {{ busenos.prasteja.zodis|lower }} {{ pr }}.</span>
+    </a>
+    {% endfor %}
+  </div>
+  <p class="suv-taskai-legenda">
+    <span><i class="t-gereja"></i><i class="t-stabilu"></i><i class="t-prasteja"></i> {{ t("kvadratėlis – rodiklio būsena", "square – status of the indicator") }}</span>
+    <span><b class="t-gereja"></b><b class="t-stabilu"></b><b class="t-prasteja"></b> {{ t("taškeliai – jo sudedamųjų dalių (skiltis „Kiti rodikliai“) būsenos", "dots – status of its components (under “Other indicators”)") }}</span>
+    <span>{{ t("juosta ir skaičiai – visi srities vertinimai", "bar and counts – all assessments in the area") }}</span>
+  </p>
+</section>
+
+{% for s in sritys %}
+<section class="sritis{% if not s.rodikliai %} sritis-rengiama{% endif %}" id="sritis-{{ s.nr }}">
+  <div class="sritis-galva">
+    <div>
+      <div class="sritis-nr">{{ t(s.nr ~ " sritis", "Area " ~ s.nr) }}</div>
+      <h2>{{ s.pavadinimas }}</h2>
+      <p class="klausimas">{{ s.klausimas }}</p>
+    </div>
+    {% if s.rodikliai %}
+    <p class="suvestine">
+      {% for k in ["gereja", "stabilu", "prasteja"] if s.suvestine[k] %}
+        <span class="zyme zyme-{{ k }}"><span aria-hidden="true">{{ busenos[k].ikona }}</span> {{ busenos[k].zodis }}: {{ s.suvestine[k] }}</span>
+      {% endfor %}
+    </p>
+    {% endif %}
+  </div>
+
+  {% if s.rodikliai %}
+  <div class="korteles">
+    {% for r in s.pagrindines %}
+    <a class="kortele kortele-{{ r.busena }}" href="rodikliai/{{ r.id }}.html">
+      <div class="kortele-virsus">
+        <h3>{{ r.pavadinimas }}</h3>
+        <span class="zyme zyme-{{ r.busena }}"><span aria-hidden="true">{{ busenos[r.busena].ikona }}</span> {{ busenos[r.busena].zodis }}</span>
+      </div>
+      {% if r.reiksme is not none %}
+      <div class="kortele-skaicius">{{ r.reiksme|sk(r.zenklas, r.dec) }}<span class="vnt">{{ r.vienetai }}</span></div>
+      <div class="kortele-aprasas">{{ r.trumpas_aprasas }} · {{ r.laikotarpis|laikotarpis }}</div>
+      {% if r.palyginimas and r.busena != "info" %}<div class="kortele-palyg">{{ busenos[r.busena].zodis }}, {{ r.palyginimas }}</div>{% endif %}
+      {% if r.tevas is defined %}<div class="kortele-palyg">{{ t("Dalis rodiklio „" ~ r.tevas.pavadinimas ~ "“", "Part of the indicator “" ~ r.tevas.pavadinimas ~ "”") }}</div>{% endif %}
+      {% if r.nesutampa %}
+      <ul class="kortele-dalys" aria-label="{{ t('Kitaip vertinamos dalys', 'Components assessed differently') }}">
+        {% for x in r.nesutampa[:2] %}
+        <li class="kd-{{ x.busena }}"><span aria-hidden="true">{{ busenos[x.busena].ikona }}</span> {{ x.pavadinimas }}: {{ busenos[x.busena].zodis|lower }}{% if x.pokytis %} ({{ x.pokytis }}){% endif %}</li>
+        {% endfor %}
+        {% if r.nesutampa|length > 2 %}<li class="kd-daugiau">{{ t("ir dar " ~ (r.nesutampa|length - 2) ~ " – žr. „Plačiau“", "and " ~ (r.nesutampa|length - 2) ~ " more – see “More”") }}</li>{% endif %}
+      </ul>
+      {% endif %}
+      {{ r.spark|safe }}
+      {% if r.vadyba_trumpai %}<div class="kortele-vadyba"><b>Vadyba:</b> {{ r.vadyba_trumpai }}</div>{% endif %}
+      {% else %}
+      <div class="kortele-tuscia">{{ r.trumpas_aprasas|capitalize }}</div>
+      {% endif %}
+      <span class="kortele-nuoroda">{{ t("Plačiau", "More") }} →</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% if s.kitos %}
+  <details class="kiti">
+    <summary><span class="kiti-pav">{{ t("Kiti rodikliai", "Other indicators") }} ({{ s.kitos|length }})</span>
+      <span class="kiti-taskai" aria-hidden="true">{% for x in s.kitos %}<i class="t-{{ x.busena }}"></i>{% endfor %}</span>
+      <span class="kiti-rodykle" aria-hidden="true">▾</span></summary>
+    <div class="korteles korteles-mazos">
+      {% for x in s.kitos %}
+      <a class="kortele kortele-maza kortele-{{ x.busena }}" href="rodikliai/{{ x.id }}.html">
+        <div class="kortele-virsus">
+          <h3>{{ x.pavadinimas }}</h3>
+          <span class="zyme zyme-{{ x.busena }}"><span aria-hidden="true">{{ busenos[x.busena].ikona }}</span> {{ busenos[x.busena].zodis }}</span>
+        </div>
+        <div class="kortele-skaicius">{{ x.reiksme|sk(x.zenklas, x.dec) }}<span class="vnt">{{ x.vienetai }}</span></div>
+        <div class="kortele-aprasas">{{ x.laikotarpis|laikotarpis }}{% if x.pokytis %} · {{ x.pokytis }}{% endif %}</div>
+        <div class="kortele-palyg">{{ t("Dalis rodiklio „" ~ x.tevas.pavadinimas ~ "“", "Part of the indicator “" ~ x.tevas.pavadinimas ~ "”") }}</div>
+        {{ x.spark|safe }}
+      </a>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+  {% else %}
+  <p class="rengiama">{{ t("Rodikliai rengiami.", "Indicators in preparation.") }}</p>
+  {% endif %}
+</section>
+{% endfor %}
+
+<section class="programa-kvietimas" id="programa">
+  <div>
+    <h2>Nori ne tik žinoti šiuos skaičius, bet ir juos keisti?</h2>
+    <p>{{ programa.pavadinimas }}: {{ programa.aprasas }}. Mokaisi organizuoti paciento kelią, valdyti
+       sveikatos įstaigos komandą, finansus ir kokybę, o praktiką atlieki ligoninėse, poliklinikose ir ligonių kasose.</p>
+  </div>
+  <div class="programa-mygtukai">
+    <a class="mygtukas mygtukas-pagr" href="{{ programa.nuoroda }}">Apie programą</a>
+    <a class="mygtukas" href="{{ programa.registracija }}">Registruokis konsultacijai</a>
+  </div>
+</section>
+{% endblock %}

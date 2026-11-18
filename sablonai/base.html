@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="{{ kalba }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Sveikata skaičiais{% endblock %}</title>
+<meta name="description" content="Lietuvos sveikatos sistema skaičiais: gyvenimo trukmė, eilės, medikai, išlaidos ir darbo vietos. Ką čia gali pakeisti sveikatos vadyba?">
+<link rel="stylesheet" href="{{ kelias }}statika/stilius.css?v={{ css_versija }}">
+{% block head %}{% endblock %}
+</head>
+<body>
+<header class="virsus">
+  <div class="plotis">
+    <a class="logo" href="{{ kelias }}index.html">Sveikata skaičiais</a>
+    <nav class="meniu" aria-label="{{ t('Pagrindinis meniu', 'Main menu') }}">
+      <a class="meniu-nuoroda meniu-plati" href="{{ kelias }}index.html#suvestine">{{ t("Suvestinė", "Overview") }}</a>
+      <details class="meniu-sritys">
+        <summary>{{ t("Sritys", "Areas") }} <span aria-hidden="true" class="rodykle">▾</span></summary>
+        <div class="meniu-skydas">
+          <a class="meniu-siaura" href="{{ kelias }}index.html#suvestine">{{ t("Suvestinė", "Overview") }}</a>
+          {% for s in meniu_sritys %}
+          <a href="{{ kelias }}index.html#sritis-{{ s.nr }}">
+            <span class="meniu-nr">{{ s.nr }}</span>
+            <span class="meniu-pav">{{ s.pavadinimas }}</span>
+            <span class="meniu-taskai" aria-hidden="true">{% for r in s.rodikliai %}<i class="t-{{ r.busena }}"></i>{% endfor %}</span>
+          </a>
+          {% endfor %}
+          <a class="meniu-siaura" href="{{ kelias }}metodika.html">{{ t("Vertinimo metodika", "Assessment methodology") }}</a>
+        </div>
+      </details>
+      <a class="meniu-nuoroda meniu-plati" href="{{ kelias }}metodika.html">{{ t("Metodika", "Methodology") }}</a>
+      <a class="meniu-nuoroda meniu-programa" href="{{ programa.nuoroda }}">Studijuok {{ programa.pavadinimas|lower }}</a>
+    </nav>
+  </div>
+</header>
+<main class="plotis">
+{% block turinys %}{% endblock %}
+</main>
+<footer class="apacia">
+  <div class="plotis apacia-tinklelis">
+    <div class="apacia-kurejas">
+      {% if mru_logo %}<a href="https://www.mruni.eu/{{ 'en/' if en }}" class="apacia-logo"><img src="{{ kelias }}{{ mru_logo }}" alt="{{ t('Mykolo Romerio universitetas', 'Mykolas Romeris University') }}" height="48"></a>{% endif %}
+      <p class="apacia-pav">{{ t("Švieslentės kūrėjas –", "Created by") }} <b>{{ t("Mykolo Romerio universitetas", "Mykolas Romeris University") }}</b></p>
+      <address class="apacia-kontaktai">
+        {{ t("Ateities g. 20, LT-08303 Vilnius", "Ateities g. 20, LT-08303 Vilnius, Lithuania") }}<br>
+        {{ t("Juridinio asmens kodas", "Legal entity code") }} 111951726<br>
+        {{ t("Tel.", "Phone") }} <a href="tel:+37061027509">+370 610 27509</a>
+      </address>
+      <p>© {{ metai }} {{ t("Mykolo Romerio universitetas. Visos teisės saugomos.", "Mykolas Romeris University. All rights reserved.") }}
+         {{ t("Statistiniai duomenys priklauso jų teikėjams ir naudojami pagal jų pakartotinio naudojimo sąlygas.", "Statistical data belong to their providers and are used under their re-use terms.") }}</p>
+    </div>
+    <div>
+      <p>Duomenų šaltiniai: Eurostat, Valstybės duomenų agentūra ir Lietuvos atvirų duomenų portalas (data.gov.lt),
+         Užimtumo tarnyba, Higienos institutas. Duomenys tikrinami kas savaitę; puslapis atnaujintas {{ atnaujinta }}.
+         <a href="{{ kelias }}metodika.html">Vertinimo metodika</a>.</p>
+      <p>Švieslentę parengė <a href="{{ programa.nuoroda }}">{{ programa.pavadinimas }}</a> studijų programos komanda.
+         Ji sukurta remiantis MRU <a href="https://dgudel.github.io/vyriausybes-veiklos-stebesena/">Vyriausybės veiklos stebėsenos švieslente</a>.</p>
+      <p class="apacia-di"><span class="di-zyma" aria-hidden="true">DI</span>
+         Kuriant švieslentę naudotas dirbtinis intelektas (Anthropic Claude).
+         Rodiklių reikšmės ir vertinimai apskaičiuojami automatiškai pagal skelbiamas taisykles, be DI.
+         <a href="{{ kelias }}metodika.html#di">Plačiau apie DI naudojimą</a>.</p>
+    </div>
+  </div>
+</footer>
+<script>
+  // Uždaryti meniu paspaudus nuorodą arba už jo ribų
+  document.addEventListener("click", function (e) {
+    var m = document.querySelector(".meniu-sritys");
+    if (m && m.open && (!m.contains(e.target) || e.target.closest(".meniu-skydas a"))) m.open = false;
+  });
+</script>
+</body>
+</html>
